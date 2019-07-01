@@ -53,6 +53,7 @@ Token *tokenize(char *p);
 /* generate.c */
 Node *expr();
 Node *mul();
+Node *unary();
 Node *term();
 void gen(Node *node);
 

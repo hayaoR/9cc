@@ -35,27 +35,32 @@ Node *expr() {
 }
 
 Node *mul() {
-  Node *node = term();
+  Node *node = unary();
 
   for (;;) {
     if (consume('*'))
-      node = new_node(ND_MUL, node, term());
+      node = new_node(ND_MUL, node, unary());
     else if (consume('/'))
-      node = new_node(ND_DIV, node, term());
+      node = new_node(ND_DIV, node, unary());
     else
       return node;
   }
 }
 
+Node *unary() {
+    if (consume('+'))
+        return term();
+    if (consume('-'))
+        return new_node(ND_SUB, new_node_num(0), term());
+    return term();
+}
+
 Node *term() {
- 
     if (consume('(')) {
         Node *node = expr();
         expect(')');
         return node;
     }
-
-
     return new_node_num(expect_number());
 }
 
