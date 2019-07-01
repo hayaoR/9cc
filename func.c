@@ -6,31 +6,6 @@
 #include <string.h>
 #include "9cc.h"
 
-typedef enum {
-    TK_RESERVED,
-    TK_NUM,
-    TK_EOF,
-} TokenKind;
-
-typedef struct Token Token;
-
-struct Token {
-    TokenKind kind;
-    Token *next;
-    int val;
-    char *str;
-};
-
-Token *token;
-
-void error(char *fmt, ...) {
-    va_list ap;
-    va_start(ap, fmt);
-    vfprintf(stderr, fmt, ap);
-    fprintf(stderr, "\n");
-    exit(1);
-}
-
 bool consume(char op) {
     if (token->kind != TK_RESERVED || token->str[0] != op)
         return false;
@@ -76,7 +51,7 @@ Token *tokenize(char *p) {
             continue;
         }
 
-        if (*p == '+' || *p == '-') {
+        if (*p == '+' || *p == '-' || *p == '*' || *p == '/' || *p == '(' || *p == ')') {
             cur = new_token(TK_RESERVED, cur, p++);
             continue;
         }
