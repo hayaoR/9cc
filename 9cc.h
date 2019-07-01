@@ -14,6 +14,7 @@ struct Token {
     Token *next;
     int val;
     char *str;
+    int len;
 };
 Token *token;
 
@@ -23,6 +24,10 @@ typedef enum {
     ND_SUB,
     ND_MUL,
     ND_DIV,
+    ND_EQ,
+    ND_NE,
+    ND_LT,
+    ND_LE,
     ND_NUM,
 } NodeKind;
 
@@ -43,8 +48,8 @@ void error(char *fmt, ...);
 void error_at(char *loc, char *fmt, ...);
 
 /* func.c */
-bool consume(char op);
-void expect(char op);
+bool consume(char *op);
+void expect(char *op);
 int expect_number();
 bool at_eof();
 
@@ -52,6 +57,9 @@ Token *tokenize(char *p);
 
 /* generate.c */
 Node *expr();
+Node *equality();
+Node *relational();
+Node *add();
 Node *mul();
 Node *unary();
 Node *term();

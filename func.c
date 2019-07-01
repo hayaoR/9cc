@@ -6,15 +6,19 @@
 #include <string.h>
 #include "9cc.h"
 
-bool consume(char op) {
-    if (token->kind != TK_RESERVED || token->str[0] != op)
+bool consume(char *op) {
+    if (token->kind != TK_RESERVED || 
+        strlen(op) != token->len ||
+        memcmp(token->str, op, token->len))
         return false;
     token = token->next;
     return true;
 }
 
-void expect(char op) {
-    if (token->kind != TK_RESERVED || token->str[0] != op)
+void expect(char *op) {
+    if (token->kind != TK_RESERVED || 
+        strlen(op) != token->len ||
+        memcmp(token->str, op, token->len))
         error("'%c'ではありません。", op);
     token = token->next;
 } 
@@ -51,8 +55,16 @@ Token *tokenize(char *p) {
             continue;
         }
 
-        if (*p == '+' || *p == '-' || *p == '*' || *p == '/' || *p == '(' || *p == ')') {
+        if (!strncmp(p, ">=", 2) || !strncmp(p, "<=", 2) || !strncmp(p, "==", 2) || !strncmp(p, "!=", 2)) {
+            cur = new_token(TK_RESERVED, cur, p);
+            p+=2;
+            cur->len = 2;
+            continue;
+        }
+
+        if (*p == '+' || *p == '-' || *p == '*' || *p == '/' || *p == '(' || *p == ')' || *p == '<' || *p == '>') {
             cur = new_token(TK_RESERVED, cur, p++);
+            cur->len = 1;
             continue;
         }
 
