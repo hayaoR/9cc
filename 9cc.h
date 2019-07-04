@@ -4,6 +4,7 @@
 
 typedef enum {
     TK_RESERVED,
+    TK_IDENT,
     TK_NUM,
     TK_EOF,
 } TokenKind;
@@ -24,13 +25,14 @@ typedef enum {
     ND_SUB,
     ND_MUL,
     ND_DIV,
+    ND_ASSIGN,
+    ND_LVAR,
     ND_EQ,
     ND_NE,
     ND_LT,
     ND_LE,
     ND_NUM,
 } NodeKind;
-
 
 typedef struct Node Node;
 
@@ -39,16 +41,20 @@ struct Node {
     Node *lhs;
     Node *rhs;
     int val;
+    int offset;
 };
 
 char *user_input;
+
+Node *code[100];
 
 /* error.c */
 void error(char *fmt, ...);
 void error_at(char *loc, char *fmt, ...);
 
-/* func.c */
+/* tokenizer.c */
 bool consume(char *op);
+Token* consume_ident();
 void expect(char *op);
 int expect_number();
 bool at_eof();
@@ -56,7 +62,10 @@ bool at_eof();
 Token *tokenize(char *p);
 
 /* generate.c */
+void program();
+Node *stmt();
 Node *expr();
+Node *assign();
 Node *equality();
 Node *relational();
 Node *add();
