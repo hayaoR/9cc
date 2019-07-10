@@ -6,6 +6,8 @@
 #include <string.h>
 #include "9cc.h"
 
+
+
 bool consume(char *op) {
     if (token->kind != TK_RESERVED || 
         strlen(op) != token->len ||
@@ -83,8 +85,13 @@ Token *tokenize(char *p) {
         }
 
         if ('a' <= *p && *p <= 'z') {
-            cur = new_token(TK_IDENT, cur, p++);
-            cur->len = 1;
+            int count = 1;
+            for (int i = 1; 'a' <= *(p+i) && *(p+i) <= 'z'; i++) {
+                count++;
+            }
+            cur = new_token(TK_IDENT, cur, p);
+            cur->len = count;
+            p+=count;
             continue;
         }
 

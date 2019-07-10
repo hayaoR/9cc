@@ -35,5 +35,6 @@ try 5 "2*5; 1*5;"
 try 18 "b = 5; b*4-2;" 
 try 3 "a = 5; b=-2; a+b;"
 try 3 "a = 5; b=-2; c=a+b; c;"
+try 3 "foo= 5; bar=-2; ans=foo+bar; ans;"
 
 echo Ok

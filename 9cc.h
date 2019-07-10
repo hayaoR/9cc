@@ -44,6 +44,8 @@ struct Node {
     int offset;
 };
 
+
+
 char *user_input;
 
 Node *code[100];
