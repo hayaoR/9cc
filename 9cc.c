@@ -13,9 +13,10 @@ int main(int argc, char **argv) {
     }
 
     user_input = argv[1]; //エラー関数用
+
     token = tokenize(argv[1]);
     program();
-
+    
     printf(".intel_syntax noprefix\n");
     printf(".global main\n");
     printf("main:\n");

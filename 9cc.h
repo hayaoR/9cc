@@ -5,6 +5,7 @@
 typedef enum {
     TK_RESERVED,
     TK_IDENT,
+    TK_RETURN,
     TK_NUM,
     TK_EOF,
 } TokenKind;
@@ -32,6 +33,7 @@ typedef enum {
     ND_LT,
     ND_LE,
     ND_NUM,
+    ND_RETURN,
 } NodeKind;
 
 typedef struct Node Node;
@@ -44,7 +46,7 @@ struct Node {
     int offset;
 };
 
-
+int pos;
 
 char *user_input;
 
@@ -57,6 +59,7 @@ void error_at(char *loc, char *fmt, ...);
 /* tokenizer.c */
 bool consume(char *op);
 Token* consume_ident();
+bool consume_return();
 void expect(char *op);
 int expect_number();
 bool at_eof();

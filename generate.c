@@ -49,8 +49,18 @@ void program() {
 }
 
 Node *stmt() {
-    Node *node = expr();
-    expect(";");
+    Node *node;
+
+    if (consume_return()) {
+        node = calloc(1, sizeof(Node));
+        node->kind = ND_RETURN;
+        node->lhs = expr();
+    } else {
+        node = expr();   
+    }
+
+    if (!consume(";"))
+        error_at(token[pos].str,"';' ではないトークンです");
     return node;
 }
 
@@ -176,6 +186,14 @@ void get_lval(Node *node) {
 }
 
 void gen(Node *node) {
+    if (node->kind == ND_RETURN) {
+        gen(node->lhs);
+        printf("    pop rax\n");
+        printf("    mov rsp, rbp\n");
+        printf("    pop rbp\n");
+        printf("    ret\n");
+    return;
+    }
     switch (node->kind)
     {
     case ND_NUM:
