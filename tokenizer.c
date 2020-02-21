@@ -26,6 +26,16 @@ bool consume_return() {
         return true;
     }
 }
+
+bool consume_kind(TokenKind kind) {
+	if (token->kind != kind) {
+		return false;
+	} else {
+		token = token->next;
+		return true;
+	}
+
+}
 // If the next token is the expected symbol, read one token and return true. 
 // Otherwise, report error.
 void expect(char *op) {
@@ -99,6 +109,35 @@ Token *tokenize(char *p) {
             cur = new_token(TK_RETURN, cur, p);
             p += 6;
             cur->len = 6;
+            continue;
+        }
+
+        if (!strncmp(p, "if", 2) && !is_alnum(p[2])) {
+            cur = new_token(TK_IF, cur, p);
+            p += 2;
+            cur->len = 2;
+            continue;
+        }
+		
+        if (!strncmp(p, "else", 4) && !is_alnum(p[4])) {
+			//fprintf(stderr, "else?\n");
+            cur = new_token(TK_ELSE, cur, p);
+            p += 4;
+            cur->len = 4;
+            continue;
+        }
+
+        if (!strncmp(p, "while", 5) && !is_alnum(p[5])) {
+            cur = new_token(TK_WHILE, cur, p);
+            p += 5;
+            cur->len = 5;
+            continue;
+        }
+
+        if (!strncmp(p, "for", 3) && !is_alnum(p[3])) {
+            cur = new_token(TK_WHILE, cur, p);
+            p += 3;
+            cur->len = 3;
             continue;
         }
 

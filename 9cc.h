@@ -7,6 +7,10 @@ typedef enum {
     TK_RESERVED, // symbol
     TK_IDENT, // multi-character identifier
     TK_RETURN,
+	TK_IF,
+	TK_ELSE,
+	TK_WHILE,
+	TK_FOR,
     TK_NUM,
     TK_EOF,
 } TokenKind;
@@ -37,6 +41,8 @@ typedef enum {
     ND_LE,
     ND_NUM,
     ND_RETURN,
+	ND_IF,
+	ND_IFELSE,
 } NodeKind;
 
 typedef struct Node Node;
@@ -67,6 +73,7 @@ void error_at(char *loc, char *fmt, ...);
 bool consume(char *op);
 Token* consume_ident();
 bool consume_return();
+bool consume_kind(TokenKind kind);
 void expect(char *op);
 int expect_number();
 bool at_eof();

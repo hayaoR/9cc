@@ -6,6 +6,9 @@
 #include <string.h>
 #include "9cc.h"
 
+// Used to give a unique label
+int SERIAL = 0;
+
 typedef struct LVar LVar;
 
 // local variable.
@@ -66,8 +69,27 @@ void program() {
 
 Node *stmt() {
     Node *node;
+	if (consume_kind(TK_IF)) {
+		node = calloc(1, sizeof(Node));
+		expect("(");
+		node->lhs = expr();
+		expect(")");
+		Node *tmp;
+		tmp = calloc(1, sizeof(Node));
+		tmp->lhs = stmt();
+		if (consume_kind(TK_ELSE)) {
+			node->kind = ND_IFELSE;
+			tmp->rhs = stmt();
+		} else {
+			//fprintf(stderr,"here?\n");
+			node->kind = ND_IF;
+		}
+		node->rhs = tmp;
+	} else if (consume_kind(TK_WHILE)) {
 
-    if (consume_return()) {
+	} else if (consume_kind(TK_FOR)) {
+
+	} else if (consume_kind(TK_RETURN)) {
         node = calloc(1, sizeof(Node));
         node->kind = ND_RETURN;
         node->lhs = expr();
@@ -228,6 +250,31 @@ void gen(Node *node) {
         printf("    ret\n");
     	return;
     }
+	if (node->kind == ND_IF) {
+		int tmp = ++SERIAL;
+		gen(node->lhs);
+        printf("    pop rax\n");
+        printf("    cmp rax, 0\n");
+        printf("    je .Lend%d\n", tmp);
+		gen(node->rhs->lhs);
+        printf(".Lend%d:\n", tmp);
+		return;
+	}
+	if (node->kind == ND_IFELSE) {
+		int tmp = ++SERIAL;
+		gen(node->lhs);
+        printf("    pop rax\n");
+        printf("    cmp rax, 0\n");
+        printf("    je .Lelse%d\n", tmp);
+		gen(node->rhs->lhs);
+        printf("    jmp .Lend%d\n", tmp);
+        printf(".Lelse%d:\n", tmp);
+		gen(node->rhs->rhs);
+        printf(".Lend%d:\n", tmp);
+
+		return;
+	}
+	
     switch (node->kind)
     {
     case ND_NUM:
