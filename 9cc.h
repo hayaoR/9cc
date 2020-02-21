@@ -1,10 +1,11 @@
 #ifndef CC_H
 #define CC_H
 
-
+///////////////// used in code -> tokens //////////////////////////////////
+// Token type
 typedef enum {
-    TK_RESERVED,
-    TK_IDENT,
+    TK_RESERVED, // symbol
+    TK_IDENT, // multi-character identifier
     TK_RETURN,
     TK_NUM,
     TK_EOF,
@@ -12,15 +13,17 @@ typedef enum {
 
 typedef struct Token Token;
 struct Token {
-    TokenKind kind;
-    Token *next;
-    int val;
-    char *str;
+    TokenKind kind; 
+    Token *next; // next input token
+    int val; // if the toke is TK_NUM, the number. 
+    char *str; // Token str 
     int len;
 };
+// currently focused token
 Token *token;
+///////////////// used in code -> tokens //////////////////////////////////
 
-
+///////////////// used in tokens -> ast  //////////////////////////////////
 typedef enum {
     ND_ADD,
     ND_SUB,
@@ -38,12 +41,15 @@ typedef enum {
 
 typedef struct Node Node;
 
+/*
+	offset: member that represents the offset of the local variable from the base pointer.
+*/
 struct Node {
     NodeKind kind;
     Node *lhs;
     Node *rhs;
-    int val;
-    int offset;
+    int val; // used only when kind is ND_NUM
+    int offset; // used only when kind is ND_LVAR
 };
 
 int pos;
@@ -51,6 +57,7 @@ int pos;
 char *user_input;
 
 Node *code[100];
+///////////////// used in tokens -> ast  //////////////////////////////////
 
 /* error.c */
 void error(char *fmt, ...);

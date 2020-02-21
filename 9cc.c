@@ -14,6 +14,8 @@ int main(int argc, char **argv) {
 
     user_input = argv[1]; //エラー関数用
 
+	// tokenize and parse
+	// the result is stored in code
     token = tokenize(argv[1]);
     program();
     
@@ -21,7 +23,8 @@ int main(int argc, char **argv) {
     printf(".global main\n");
     printf("main:\n");
 
-    //  プロローグ
+    // Prologue: fixed instruction output by the compiler at the beginning of the function.
+	// why 208? -> to allocate space for all single-character variables. 26*8 = 208
     printf("    push rbp\n");
     printf("    mov rbp, rsp\n");
     printf("    sub rsp, 208\n");
@@ -33,7 +36,7 @@ int main(int argc, char **argv) {
         printf("    pop rax\n");
     }
 
-    // エピローグ
+    // Epilogue: fixed instructions output at the end of the function.
     printf("    mov rsp, rbp\n");
     printf("    pop rbp\n");
     printf("    ret\n");

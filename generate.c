@@ -8,6 +8,7 @@
 
 typedef struct LVar LVar;
 
+// local variable.
 struct LVar {
     LVar *next;
     char *name;
@@ -15,6 +16,7 @@ struct LVar {
     int offset;
 };
 
+// keep variables.
 LVar *locals = NULL;
 
 Node *new_node(NodeKind kind, Node *lhs, Node *rhs) {
@@ -32,12 +34,26 @@ Node *new_node_num(int val) {
     return node;
 }
 
+/*
+	int memcmp( const void *str1 , const void *str2, size_t len );
+	if str1 == str2 (len characters) -> 0
+	else if str1 > str2 -> positive integer
+	else if str1 < str2 -> postive integer
+*/
 LVar *find_lvar(Token *tok) {
     for (LVar *var = locals; var; var = var->next) {
         if (var->len == tok->len && !memcmp(tok->str, var->name, var->len))
             return var;
     }
     return NULL;
+}
+
+Token* consume_ident() {
+    if (token->kind !=  TK_IDENT)
+        return NULL;
+    Token* tmp = token;
+    token = token->next;
+    return tmp;
 }
 
 void program() {
@@ -185,6 +201,24 @@ void get_lval(Node *node) {
     printf("    push rax\n"); 
 }
 
+// emulate the stack machine in x86-64
+/*
+	rsp: used as the stack pointer
+	On x86-64, the result of the compare instruction is set in a special "flag register".
+
+	sete instruction: If the values of the two registers checked by the previous cmp instruction are the same, 
+						set 1 to the specified register (here, AL). Otherwise, set to 0.
+
+	al: Alias register that is lower 8 bits of RAX
+
+	movzb instruction: move with zero extend.
+
+	rbp: base register Always points to the start of the current function frame.
+
+	mov rdi, [rax] -> load value from address in RAX and set to RDI.
+
+	mov [rdi], rax -> store the value of RAX at the address in RDI.
+*/
 void gen(Node *node) {
     if (node->kind == ND_RETURN) {
         gen(node->lhs);
@@ -192,7 +226,7 @@ void gen(Node *node) {
         printf("    mov rsp, rbp\n");
         printf("    pop rbp\n");
         printf("    ret\n");
-    return;
+    	return;
     }
     switch (node->kind)
     {

@@ -7,7 +7,8 @@
 #include "9cc.h"
 
 
-
+// If the next token is the expected symbol, read one token and return true. 
+// Otherwise, returns false.
 bool consume(char *op) {
     if (token->kind != TK_RESERVED || 
         strlen(op) != token->len ||
@@ -15,14 +16,6 @@ bool consume(char *op) {
         return false;
     token = token->next;
     return true;
-}
-
-Token* consume_ident() {
-    if (token->kind !=  TK_IDENT)
-        return NULL;
-    Token* tmp = token;
-    token = token->next;
-    return tmp;
 }
 
 bool consume_return() {
@@ -33,7 +26,8 @@ bool consume_return() {
         return true;
     }
 }
-
+// If the next token is the expected symbol, read one token and return true. 
+// Otherwise, report error.
 void expect(char *op) {
     if (token->kind != TK_RESERVED || 
         strlen(op) != token->len ||
@@ -61,6 +55,7 @@ int is_alnum(char c) {
             (c == '_');
 }
 
+// generate the new token and connect cur
 Token *new_token(TokenKind kind, Token *cur, char *str) {
     Token *tok = calloc(1, sizeof(Token));
     tok->kind = kind;
