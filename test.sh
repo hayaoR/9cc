@@ -48,9 +48,15 @@ try 3 "i = 0; num = 3; if (i == 1)
 try 5 "i = 0; num = 3; if (i == 1) 
 						num = 4;
 						else
-						num=5;;
+						num=5;
 						return num;"
-try 5 "i = 1; n=5; while (i < n)
-							i = i+1;;
+try 3 "i = 1; n=3; while (i < n)
+							i = i+1;
 							return i;"
+try 100 "i = 1; n=100; while (i < n)
+							i = i+1;
+							return i;"
+try 4 "ans = 0; n=5; for (i=1;i<n;i = i+2)
+						ans = ans + i;
+						return ans;"
 echo Ok

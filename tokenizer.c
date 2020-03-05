@@ -136,7 +136,7 @@ Token *tokenize(char *p) {
         }
 
         if (!strncmp(p, "for", 3) && !is_alnum(p[3])) {
-            cur = new_token(TK_WHILE, cur, p);
+            cur = new_token(TK_FOR, cur, p);
             p += 3;
             cur->len = 3;
             continue;

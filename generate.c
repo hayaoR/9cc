@@ -70,29 +70,56 @@ void program() {
 Node *stmt() {
     Node *node;
 	if (consume_kind(TK_IF)) {
+		// if (A) B else C
 		node = calloc(1, sizeof(Node));
 		expect("(");
 		node->lhs = expr();
 		expect(")");
-		Node *tmp;
-		tmp = calloc(1, sizeof(Node));
-		tmp->lhs = stmt();
+		Node *child;
+		child= calloc(1, sizeof(Node));
+		child->lhs = stmt();
 		if (consume_kind(TK_ELSE)) {
 			node->kind = ND_IFELSE;
-			tmp->rhs = stmt();
+			child->rhs = expr();
+			//child->rhs = stmt();
 		} else {
-			//fprintf(stderr,"here?\n");
 			node->kind = ND_IF;
 		}
-		node->rhs = tmp;
+		node->rhs = child;
 	} else if (consume_kind(TK_WHILE)) {
+		/*
+			while (A) B
+		*/
 		node = calloc(1, sizeof(Node));
-		expect("(");
-		node->lhs = expr();
-		expect(")");
-		node->rhs = stmt();
 		node->kind=ND_WHILE;
+
+		expect("(");
+		node->lhs = expr(); // A
+		expect(")");
+		node->rhs = expr(); // B
 	} else if (consume_kind(TK_FOR)) {
+		/* 
+			for (A; B; C)
+					D;
+		*/
+		Node *child, *grandchild;
+
+		node = calloc(1, sizeof(Node));
+		child= calloc(1, sizeof(Node));
+		grandchild =calloc (1, sizeof(Node));
+		//set kind
+		node->kind = ND_FOR;
+
+		// construct tree
+		node->rhs = child;
+		child->rhs = grandchild;
+
+		expect("(");
+		node->lhs = stmt(); //A	
+		child->lhs = stmt();//B
+		grandchild->lhs = expr();//C
+		expect(")");
+		grandchild->rhs = expr();//D
 
 	} else if (consume_kind(TK_RETURN)) {
         node = calloc(1, sizeof(Node));
@@ -283,7 +310,7 @@ void gen(Node *node) {
 	}
 	if (node->kind == ND_WHILE) {
 		int tmp = ++SERIAL;
-		printf(".Lbegin%d\n", tmp);
+		printf(".Lbegin%d:\n", tmp);
 		gen(node->lhs);
         printf("    pop rax\n");
         printf("    cmp rax, 0\n");
@@ -291,8 +318,22 @@ void gen(Node *node) {
 		gen(node->rhs);
         printf("    jmp .Lbegin%d\n", tmp);
         printf(".Lend%d:\n", tmp);
-
+		return;
 	}	
+	if (node->kind == ND_FOR) {
+		int tmp = ++SERIAL;
+		gen(node->lhs); // A
+		printf(".Lbegin%d:\n", tmp);
+		gen(node->rhs->lhs); // B
+        printf("    pop rax\n");
+        printf("    cmp rax, 0\n");
+        printf("    je .Lend%d\n", tmp);
+		gen(node->rhs->rhs->rhs); // D
+		gen(node->rhs->rhs->lhs); // C
+        printf("    jmp .Lbegin%d\n", tmp);
+        printf(".Lend%d:\n", tmp);
+		return;
+	}
     switch (node->kind)
     {
     case ND_NUM:
