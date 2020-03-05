@@ -128,6 +128,7 @@ Token *tokenize(char *p) {
         }
 
         if (!strncmp(p, "while", 5) && !is_alnum(p[5])) {
+			//fprintf(stderr, "while?\n");
             cur = new_token(TK_WHILE, cur, p);
             p += 5;
             cur->len = 5;
@@ -151,7 +152,7 @@ Token *tokenize(char *p) {
             p+=count;
             continue;
         }
-        fprintf(stderr, "hi\n");
+        //fprintf(stderr, "hi\n");
         error("トークナイズできません。");
     }
 

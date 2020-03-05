@@ -39,19 +39,18 @@ try 3 "foo= 5; bar=-2; ans=foo+bar; ans;"
 try 14 "a = 3;
     b = 5 * 6 - 8;
     return a + b / 2;"
-#<< COMMENTOUT
 try 4 "i = 1; num = 3; if (i == 1) 
 						num = 4;;
 						return num;"
-#<< COMMENTOUT
 try 3 "i = 0; num = 3; if (i == 1) 
 						num = 4;;
 						return num;"
-#<< COMMENTOUT
 try 5 "i = 0; num = 3; if (i == 1) 
 						num = 4;
 						else
 						num=5;;
 						return num;"
-#COMMENTOUT
+try 5 "i = 1; n=5; while (i < n)
+							i = i+1;;
+							return i;"
 echo Ok

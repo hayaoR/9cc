@@ -86,7 +86,12 @@ Node *stmt() {
 		}
 		node->rhs = tmp;
 	} else if (consume_kind(TK_WHILE)) {
-
+		node = calloc(1, sizeof(Node));
+		expect("(");
+		node->lhs = expr();
+		expect(")");
+		node->rhs = stmt();
+		node->kind=ND_WHILE;
 	} else if (consume_kind(TK_FOR)) {
 
 	} else if (consume_kind(TK_RETURN)) {
@@ -240,6 +245,8 @@ void get_lval(Node *node) {
 	mov rdi, [rax] -> load value from address in RAX and set to RDI.
 
 	mov [rdi], rax -> store the value of RAX at the address in RDI.
+
+	rax: The value stored in RAX when returning from the function is the return value of the function
 */
 void gen(Node *node) {
     if (node->kind == ND_RETURN) {
@@ -274,7 +281,18 @@ void gen(Node *node) {
 
 		return;
 	}
-	
+	if (node->kind == ND_WHILE) {
+		int tmp = ++SERIAL;
+		printf(".Lbegin%d\n", tmp);
+		gen(node->lhs);
+        printf("    pop rax\n");
+        printf("    cmp rax, 0\n");
+        printf("    je .Lend%d\n", tmp);
+		gen(node->rhs);
+        printf("    jmp .Lbegin%d\n", tmp);
+        printf(".Lend%d:\n", tmp);
+
+	}	
     switch (node->kind)
     {
     case ND_NUM:
