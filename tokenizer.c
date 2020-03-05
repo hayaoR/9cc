@@ -18,15 +18,6 @@ bool consume(char *op) {
     return true;
 }
 
-bool consume_return() {
-    if (token->kind != TK_RETURN) {
-        return false;
-    } else {
-        token = token->next;
-        return true;
-    }
-}
-
 bool consume_kind(TokenKind kind) {
 	if (token->kind != kind) {
 		return false;
@@ -93,7 +84,7 @@ Token *tokenize(char *p) {
             continue;
         }
 
-        if (*p == '+' || *p == '-' || *p == '*' || *p == '/' || *p == '(' || *p == ')' || *p == '<' || *p == '>' || *p == ';' || *p == '=') {
+        if (*p == '+' || *p == '-' || *p == '*' || *p == '/' || *p == '(' || *p == ')' || *p == '<' || *p == '>' || *p == ';' || *p == '=' || *p == '{' || *p == '}') {
             cur = new_token(TK_RESERVED, cur, p++);
             cur->len = 1;
             continue;

@@ -59,4 +59,14 @@ try 100 "i = 1; n=100; while (i < n)
 try 4 "ans = 0; n=5; for (i=1;i<n;i = i+2)
 						ans = ans + i;
 						return ans;"
+try 6 "i = 0; n=4; ans = 0; while (i < n) {
+				ans = ans + i;
+				i = i + 1;
+	}
+	return ans;"
+try 1 "i = 0; n=4; if (i < n) {
+							i = i + 2;
+							i = i - 1;
+							}
+							return i;"
 echo Ok

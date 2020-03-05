@@ -45,6 +45,7 @@ typedef enum {
 	ND_IFELSE,
 	ND_WHILE,
 	ND_FOR,
+	ND_BLOCK,
 } NodeKind;
 
 typedef struct Node Node;
@@ -56,6 +57,10 @@ struct Node {
     NodeKind kind;
     Node *lhs;
     Node *rhs;
+	//ハードコードするのは良くない。できればC++でいうvectorのようなものが望ましい
+	//100個以上stmtがあるとバグる
+	Node *block[100]; // used only when kind is ND_BLOCK
+	int block_len; // used only when kind is ND_BLOCK 
     int val; // used only when kind is ND_NUM
     int offset; // used only when kind is ND_LVAR
 };
@@ -74,7 +79,6 @@ void error_at(char *loc, char *fmt, ...);
 /* tokenizer.c */
 bool consume(char *op);
 Token* consume_ident();
-bool consume_return();
 bool consume_kind(TokenKind kind);
 void expect(char *op);
 int expect_number();

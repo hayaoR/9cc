@@ -16,23 +16,14 @@ main:
     mov rax, rbp
     sub rax, 16
     push rax
-    push 5
+    push 4
     pop rdi
     pop rax
     mov [rax], rdi
     push rdi
     pop rax
     mov rax, rbp
-    sub rax, 24
-    push rax
-    push 1
-    pop rdi
-    pop rax
-    mov [rax], rdi
-    push rdi
-.Lbegin1:
-    mov rax, rbp
-    sub rax, 24
+    sub rax, 8
     push rax
     pop rax
     mov rax, [rax]
@@ -61,29 +52,6 @@ main:
     pop rax
     mov rax, [rax]
     push rax
-    mov rax, rbp
-    sub rax, 24
-    push rax
-    pop rax
-    mov rax, [rax]
-    push rax
-    pop rdi
-    pop rax
-    add rax, rdi
-    push rax
-    pop rdi
-    pop rax
-    mov [rax], rdi
-    push rdi
-    mov rax, rbp
-    sub rax, 24
-    push rax
-    mov rax, rbp
-    sub rax, 24
-    push rax
-    pop rax
-    mov rax, [rax]
-    push rax
     push 2
     pop rdi
     pop rax
@@ -93,7 +61,26 @@ main:
     pop rax
     mov [rax], rdi
     push rdi
-    jmp .Lbegin1
+    pop rax
+    mov rax, rbp
+    sub rax, 8
+    push rax
+    mov rax, rbp
+    sub rax, 8
+    push rax
+    pop rax
+    mov rax, [rax]
+    push rax
+    push 1
+    pop rdi
+    pop rax
+    sub rax, rdi
+    push rax
+    pop rdi
+    pop rax
+    mov [rax], rdi
+    push rdi
+    pop rax
 .Lend1:
     pop rax
     mov rax, rbp

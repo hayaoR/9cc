@@ -125,7 +125,17 @@ Node *stmt() {
         node = calloc(1, sizeof(Node));
         node->kind = ND_RETURN;
         node->lhs = stmt();
-    } else {
+    } else if (consume("{")) {
+        node = calloc(1, sizeof(Node));
+		for (int i = 0; !consume("}") && i < 100; ++i) {
+			Node* tmp_node;
+			tmp_node = stmt();
+			node->block[i] = tmp_node;
+			node->block_len = i+1;
+			//fprintf(stderr, "get\n");
+		}
+		node->kind = ND_BLOCK;
+	} else {
         node = expr();   
     	if (!consume(";"))
     	    error_at(token[pos].str,"';' ではないトークンです");
@@ -332,6 +342,17 @@ void gen(Node *node) {
 		gen(node->rhs->rhs->lhs); // C
         printf("    jmp .Lbegin%d\n", tmp);
         printf(".Lend%d:\n", tmp);
+		return;
+	}
+	if (node->kind == ND_BLOCK) {
+		//fprintf(stderr, "len is %d\n", node->block_len);
+		for (int i = 0; i < node->block_len; ++i) {
+			//fprintf(stderr, "before\n");
+			//fprintf(stderr, "Node val is %d\n", vector[i]->val);
+			gen(node->block[i]);
+			//fprintf(stderr, "after\n");
+        	printf("    pop rax\n");
+		}
 		return;
 	}
     switch (node->kind)
