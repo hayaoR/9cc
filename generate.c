@@ -80,7 +80,7 @@ Node *stmt() {
 		child->lhs = stmt();
 		if (consume_kind(TK_ELSE)) {
 			node->kind = ND_IFELSE;
-			child->rhs = expr();
+			child->rhs = stmt();
 			//child->rhs = stmt();
 		} else {
 			node->kind = ND_IF;
@@ -96,7 +96,7 @@ Node *stmt() {
 		expect("(");
 		node->lhs = expr(); // A
 		expect(")");
-		node->rhs = expr(); // B
+		node->rhs = stmt(); // B
 	} else if (consume_kind(TK_FOR)) {
 		/* 
 			for (A; B; C)
@@ -119,18 +119,18 @@ Node *stmt() {
 		child->lhs = stmt();//B
 		grandchild->lhs = expr();//C
 		expect(")");
-		grandchild->rhs = expr();//D
+		grandchild->rhs = stmt();//D
 
 	} else if (consume_kind(TK_RETURN)) {
         node = calloc(1, sizeof(Node));
         node->kind = ND_RETURN;
-        node->lhs = expr();
+        node->lhs = stmt();
     } else {
         node = expr();   
+    	if (!consume(";"))
+    	    error_at(token[pos].str,"';' ではないトークンです");
     }
 
-    if (!consume(";"))
-        error_at(token[pos].str,"';' ではないトークンです");
     return node;
 }
 

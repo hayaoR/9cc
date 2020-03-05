@@ -40,10 +40,10 @@ try 14 "a = 3;
     b = 5 * 6 - 8;
     return a + b / 2;"
 try 4 "i = 1; num = 3; if (i == 1) 
-						num = 4;;
+						num = 4;
 						return num;"
 try 3 "i = 0; num = 3; if (i == 1) 
-						num = 4;;
+						num = 4;
 						return num;"
 try 5 "i = 0; num = 3; if (i == 1) 
 						num = 4;
