@@ -4,7 +4,10 @@ try() {
     input="$2"
 
     ./9cc "$input" > tmp.s
-    gcc -o tmp tmp.s
+	gcc -c foo.c
+
+    gcc -o tmp tmp.s foo.o
+	
     ./tmp
     actual="$?"
 
@@ -69,4 +72,5 @@ try 1 "i = 0; n=4; if (i < n) {
 							i = i - 1;
 							}
 							return i;"
+try 1 "foo(); return 1;"
 echo Ok

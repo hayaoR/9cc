@@ -19,7 +19,7 @@ struct LVar {
     int offset;
 };
 
-// keep variables.
+// ローカル変数を連結リスト 
 LVar *locals = NULL;
 
 Node *new_node(NodeKind kind, Node *lhs, Node *rhs) {
@@ -43,6 +43,7 @@ Node *new_node_num(int val) {
 	else if str1 > str2 -> positive integer
 	else if str1 < str2 -> postive integer
 */
+//  変数を名前で検索する見つからなかった場合はNULLを返す。
 LVar *find_lvar(Token *tok) {
     for (LVar *var = locals; var; var = var->next) {
         if (var->len == tok->len && !memcmp(tok->str, var->name, var->len))
@@ -220,41 +221,60 @@ Node *unary() {
 }
 
 Node *term() {
+	Node *node;
     if (consume("(")) {
-        Node *node = expr();
+        node = expr();
         expect(")");
         return node;
     }
 
     Token *tok = consume_ident();
     if (tok) {
-        Node *node = calloc(1, sizeof(Node));
-        node->kind = ND_LVAR;
+		if (consume("(")) {
+			if (consume(")")) {
+				//関数呼び出し
+				node = calloc(1, sizeof(Node));
+				node->kind = ND_FUNCTION;
+				node->name = tok->str;
+				node->len = tok->len;
 
-        if (locals == NULL) {
-            LVar *l = calloc(1, sizeof(LVar));
-            locals = l;
-        }
-        LVar *lvar = find_lvar(tok);
-        
-        if (lvar) {
-            node->offset = lvar->offset;
-        } else {
-            lvar = calloc(1, sizeof(LVar));
+				return;
+			} else {
+				error_at(token[pos].str,"')' ではないトークンです");
+			}
+		} else {
+			//多分変数解決?
+			node = calloc(1, sizeof(Node));
+			node->kind = ND_LVAR;
 
-            lvar->next = locals;
-            lvar->name = tok->str;
-            lvar->len = tok->len;
-            lvar->offset = locals->offset + 8;
-            node->offset = lvar->offset;
-            locals = lvar;
-        }
-        return node;
+			if (locals == NULL) {
+				LVar *l = calloc(1, sizeof(LVar));
+				locals = l;
+			}
+			LVar *lvar = find_lvar(tok);
+			
+			if (lvar) {
+			//登録済みのローカル変数
+				node->offset = lvar->offset;
+			} else {
+			//未登録のローカル変数
+				lvar = calloc(1, sizeof(LVar));
+			//ローカル変数の連結リストに接続
+				lvar->next = locals;
+				lvar->name = tok->str;
+				lvar->len = tok->len;
+				lvar->offset = locals->offset + 8;
+				node->offset = lvar->offset;
+				locals = lvar;
+			}
+		}
+		return node;
     }
 
     return new_node_num(expect_number());
 }
 
+//左辺値として式を評価する
 //スタックに変数のアドレスが積まれる
 void get_lval(Node *node) {
     if (node->kind != ND_LVAR)
@@ -273,9 +293,11 @@ void get_lval(Node *node) {
 	sete instruction: If the values of the two registers checked by the previous cmp instruction are the same, 
 						set 1 to the specified register (here, AL). Otherwise, set to 0.
 
-	al: Alias register that is lower 8 bits of RAX
+	al: alias register that is lower 8 bits of RAX
 
 	movzb instruction: move with zero extend.
+
+	rsp: designed to be used as a stack pointer
 
 	rbp: base register Always points to the start of the current function frame.
 
@@ -284,6 +306,17 @@ void get_lval(Node *node) {
 	mov [rdi], rax -> store the value of RAX at the address in RDI.
 
 	rax: The value stored in RAX when returning from the function is the return value of the function
+
+*/
+/*
+ 抽象木をコンパイルするためには
+ 1. 左の部分木をコンパイルする
+ 2.　右の部分木をコンパイルする
+ 3.　スタックの2つの値を、それらを加算した結果で置き換えるコードを出力する
+*/
+/*
+ x86-64のpushやpopといった命令は暗黙のうちにRSPをスタックポインタとして使って、
+ その値を変更しつつ、RSPが指しているメモリにアクセスする命令です。
 */
 void gen(Node *node) {
     if (node->kind == ND_RETURN) {
@@ -345,14 +378,18 @@ void gen(Node *node) {
 		return;
 	}
 	if (node->kind == ND_BLOCK) {
-		//fprintf(stderr, "len is %d\n", node->block_len);
 		for (int i = 0; i < node->block_len; ++i) {
-			//fprintf(stderr, "before\n");
-			//fprintf(stderr, "Node val is %d\n", vector[i]->val);
 			gen(node->block[i]);
-			//fprintf(stderr, "after\n");
         	printf("    pop rax\n");
 		}
+		return;
+	}
+	if (node->kind == ND_FUNCTION) {
+		char* str = calloc(node->len+1, sizeof(char));
+		memcpy(str, node->name, node->len);
+		str[node->len] = '\0';
+		
+        printf("    call %s\n", str);
 		return;
 	}
     switch (node->kind)

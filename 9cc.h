@@ -34,7 +34,7 @@ typedef enum {
     ND_MUL,
     ND_DIV,
     ND_ASSIGN,
-    ND_LVAR,
+    ND_LVAR, //ローカル変数
     ND_EQ,
     ND_NE,
     ND_LT,
@@ -46,6 +46,7 @@ typedef enum {
 	ND_WHILE,
 	ND_FOR,
 	ND_BLOCK,
+	ND_FUNCTION,
 } NodeKind;
 
 typedef struct Node Node;
@@ -63,6 +64,10 @@ struct Node {
 	int block_len; // used only when kind is ND_BLOCK 
     int val; // used only when kind is ND_NUM
     int offset; // used only when kind is ND_LVAR
+
+	//関数用
+	char* name;
+	int len;
 };
 
 int pos;
