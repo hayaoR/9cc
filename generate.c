@@ -231,17 +231,28 @@ Node *term() {
     Token *tok = consume_ident();
     if (tok) {
 		if (consume("(")) {
-			if (consume(")")) {
-				//関数呼び出し
-				node = calloc(1, sizeof(Node));
-				node->kind = ND_FUNCTION;
-				node->name = tok->str;
-				node->len = tok->len;
+			//fprintf(stderr, "hey\n");
+			//関数呼び出し
+			node = calloc(1, sizeof(Node));
+			node->kind = ND_FUNCTION;
+			node->name = tok->str;
+			node->len = tok->len;
+			node->arg_len = 0;
 
-				return;
-			} else {
-				error_at(token[pos].str,"')' ではないトークンです");
+			for (int i = 0; !consume(")"); i++) {
+				if (i > 5) {
+ 					error_at(token[pos].str,"引数は6個以下です。");
+				}
+				Node* tmp = calloc(1, sizeof(Node));
+				tmp = expr();
+				node->arg[i] = tmp;
+				node->arg_len = i+1;
+
+				consume(",");
 			}
+
+			//fprintf(stderr, "aftertok\n");
+			return node;
 		} else {
 			//多分変数解決?
 			node = calloc(1, sizeof(Node));
@@ -385,13 +396,36 @@ void gen(Node *node) {
 		return;
 	}
 	if (node->kind == ND_FUNCTION) {
+		//fprintf(stderr, "before\n");
+		char reg[6][4] = {"RDI", "RSI", "RDX", "RCX", "R8", "R9"};
+		//fprintf(stderr, "after\n");
+		for (int i = 0; i < node->arg_len; ++i) {
+			gen(node->arg[i]);
+        	printf("    pop rax\n");
+        	printf("    mov %s, rax\n", reg[i]);
+		}
 		char* str = calloc(node->len+1, sizeof(char));
 		memcpy(str, node->name, node->len);
 		str[node->len] = '\0';
 		
+		//16bit alignmentの実装はruiさんのchibiccに沿った
+		int tmp = ++SERIAL;
+        printf("    mov rax, rsp\n");
+        printf("    and rax, 15\n");
+        printf("    jnz .L.call.%d\n", tmp);
+        printf("    mov rax, 0\n");
         printf("    call %s\n", str);
+        printf("    jmp .L.end.%d\n", tmp);
+        printf(".L.call.%d:\n", tmp);
+        printf("    sub rsp, 8\n");
+        printf("    mov rax, 0\n");
+        printf("    call %s\n", str);
+        printf("    add rsp, 8\n");
+        printf(".L.end.%d:\n", tmp);
+
 		return;
 	}
+
     switch (node->kind)
     {
     case ND_NUM:

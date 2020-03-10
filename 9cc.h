@@ -68,6 +68,8 @@ struct Node {
 	//関数用
 	char* name;
 	int len;
+	Node *arg[6]; // used as argument of a function only when kind is ND_FUNCTION
+	int arg_len; // used as argument of a function only when kind is ND_FUNCTION
 };
 
 int pos;

@@ -73,4 +73,5 @@ try 1 "i = 0; n=4; if (i < n) {
 							}
 							return i;"
 try 1 "foo(); return 1;"
+try 1 "fooo(3, 4); return 1;"
 echo Ok
