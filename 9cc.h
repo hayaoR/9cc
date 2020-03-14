@@ -46,7 +46,8 @@ typedef enum {
 	ND_WHILE,
 	ND_FOR,
 	ND_BLOCK,
-	ND_FUNCTION,
+	ND_FUNCTIONCALL,
+	ND_FUNCTIONDECLARATION,
 } NodeKind;
 
 typedef struct Node Node;
@@ -59,8 +60,8 @@ struct Node {
     Node *lhs;
     Node *rhs;
 	//ハードコードするのは良くない。できればC++でいうvectorのようなものが望ましい
-	//100個以上stmtがあるとバグる
-	Node *block[100]; // used only when kind is ND_BLOCK
+	//1000個以上stmtがあるとバグる
+	Node *block[1000]; // used only when kind is ND_BLOCK
 	int block_len; // used only when kind is ND_BLOCK 
     int val; // used only when kind is ND_NUM
     int offset; // used only when kind is ND_LVAR
@@ -70,6 +71,7 @@ struct Node {
 	int len;
 	Node *arg[6]; // used as argument of a function only when kind is ND_FUNCTION
 	int arg_len; // used as argument of a function only when kind is ND_FUNCTION
+	int arg_offset[6];
 };
 
 int pos;
@@ -94,6 +96,7 @@ bool at_eof();
 Token *tokenize(char *p);
 
 /* generate.c */
+void function();
 void program();
 Node *stmt();
 Node *expr();

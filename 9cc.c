@@ -17,28 +17,22 @@ int main(int argc, char **argv) {
 	// tokenize and parse
 	// the result is stored in code
     token = tokenize(argv[1]);
-    program();
-    
+	/*
+    while (token->kind != TK_EOF) {
+		fprintf(stderr, "%d\n", token->kind);
+		token = token->next;
+	}
+	*/
     printf(".intel_syntax noprefix\n");
     printf(".global main\n");
-    printf("main:\n");
 
-    // Prologue: fixed instruction output by the compiler at the beginning of the function.
-	// why 208? -> to allocate space for all single-character variables. 26*8 = 208
-    printf("    push rbp\n");
-    printf("    mov rbp, rsp\n");
-    printf("    sub rsp, 208\n");
-
+	function();
     for (int i = 0; code[i]; i++) {
         gen(code[i]);
 
-        
-        printf("    pop rax\n");
+        //printf("    pop rax\n");
     }
+	//fprintf(stderr, "hey!\n");
 
-    // Epilogue: fixed instructions output at the end of the function.
-    printf("    mov rsp, rbp\n");
-    printf("    pop rbp\n");
-    printf("    ret\n");
     return 0;
 } 

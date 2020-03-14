@@ -60,6 +60,65 @@ Token* consume_ident() {
     return tmp;
 }
 
+void function() {	
+	Token *tok;
+	//local初期化
+	LVar *l = calloc(1, sizeof(LVar));
+	locals = l;
+
+	int i = 0;
+	while (!at_eof()) {
+		//fprintf(stderr, "hoy!start!\n");
+    	tok = consume_ident();
+		if (!tok) {
+ 			error_at(token[pos].str,"関数ではありません");
+		}
+		Node *node = calloc(1, sizeof(Node));
+		node->kind = ND_FUNCTIONDECLARATION;
+		node->name = tok->str;
+		node->len = tok->len;
+
+		code[i++] = node;
+		//引数
+		expect("(");
+		int arg_len = 0;
+		while(!consume(")")) {
+    		tok = consume_ident();
+			if (!tok) {
+ 				error_at(token[pos].str,"引数にふさわしくありません");
+			}
+			consume(",");
+
+			LVar *lvar = calloc(1, sizeof(LVar));
+			//ローカル変数の連結リストに接続
+			lvar->next = locals;
+			lvar->name = tok->str;
+			lvar->len = tok->len;
+			lvar->offset = locals->offset + 8;
+			node->arg_offset[arg_len] = lvar->offset;
+			locals = lvar;
+
+			
+			arg_len+=1;
+		}
+		//引数の個数
+		node->arg_len = arg_len;
+		expect("{");
+
+		//ボディ
+		int j = 0;
+		while (!consume("}")) {
+			//fprintf(stderr, "body\n");
+			node->block[j++] = stmt();
+		}
+		node->block_len = j;
+		//fprintf(stderr, "block_len%d!\n", j);
+		
+
+	}
+	code[i] = NULL;
+}
+
 void program() {
     int i = 0;
     while (!at_eof())
@@ -234,7 +293,7 @@ Node *term() {
 			//fprintf(stderr, "hey\n");
 			//関数呼び出し
 			node = calloc(1, sizeof(Node));
-			node->kind = ND_FUNCTION;
+			node->kind = ND_FUNCTIONCALL;
 			node->name = tok->str;
 			node->len = tok->len;
 			node->arg_len = 0;
@@ -333,9 +392,40 @@ void gen(Node *node) {
 	//シリアル番号を保持するために使う
 	int tmp;
 	//関数の引数のためのレジスタ
-	char reg[6][4] = {"RDI", "RSI", "RDX", "RCX", "R8", "R9"};
+	char reg[6][4] = {"rdi", "rsi", "rdx", "rcx", "r8", "r9"};
+	char *str;
     switch (node->kind)
     {
+	case ND_FUNCTIONDECLARATION:
+		str = calloc(node->len+1, sizeof(char));
+		memcpy(str, node->name, node->len);
+		str[node->len] = '\0';
+		printf("%s:\n", str);
+		// Prologue
+    	printf("    push rbp\n");
+    	printf("    mov rbp, rsp\n");
+    	printf("    sub rsp, 208\n");
+
+		//引数
+		printf("    mov rax, rbp\n");	
+		for (int i = 0; i < node->arg_len; ++i) {
+			printf("    mov rax, rbp\n");	
+			printf("    sub rax, %d\n", node->arg_offset[i]);	
+    		printf("    mov [rax], %s\n", reg[i]);
+		}
+
+
+		//ボディ
+		for (int i = 0; i < node->block_len; ++i) {
+			gen(node->block[i]);
+        	printf("    pop rax\n");
+		}
+
+		//Epilogue
+    	printf("    mov rsp, rbp\n");
+    	printf("    pop rbp\n");
+    	printf("    ret\n");
+		return;
     case ND_NUM:
         printf("    push %d\n", node->val);
         return;
@@ -352,11 +442,13 @@ void gen(Node *node) {
         printf("    pop rdi\n");
         printf("    pop rax\n");
         printf("    mov [rax], rdi\n");
-        printf("    push rdi\n"); //このpushの意味は？
+        printf("    push rdi\n"); 
         return;
 	case ND_RETURN:
 		gen(node->lhs);
-        printf("    pop rax\n");
+		if (node->lhs->kind != ND_FUNCTIONCALL) {
+   	    	printf("    pop rax\n");
+		}
         printf("    mov rsp, rbp\n");
         printf("    pop rbp\n");
         printf("    ret\n");
@@ -395,6 +487,7 @@ void gen(Node *node) {
         printf(".Lend%d:\n", tmp);
 		return;
 	case ND_FOR:
+		//fprintf(stderr, "FOR!\n");
 		tmp = ++SERIAL;
 		gen(node->lhs); // A
 		printf(".Lbegin%d:\n", tmp);
@@ -413,7 +506,7 @@ void gen(Node *node) {
         	printf("    pop rax\n");
 		}
 		return;
-	case ND_FUNCTION:
+	case ND_FUNCTIONCALL:
 		for (int i = 0; i < node->arg_len; ++i) {
 			gen(node->arg[i]);
         	printf("    pop rax\n");
