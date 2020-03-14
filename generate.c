@@ -330,16 +330,39 @@ void get_lval(Node *node) {
  その値を変更しつつ、RSPが指しているメモリにアクセスする命令です。
 */
 void gen(Node *node) {
-    if (node->kind == ND_RETURN) {
-        gen(node->lhs);
+	//シリアル番号を保持するために使う
+	int tmp;
+	//関数の引数のためのレジスタ
+	char reg[6][4] = {"RDI", "RSI", "RDX", "RCX", "R8", "R9"};
+    switch (node->kind)
+    {
+    case ND_NUM:
+        printf("    push %d\n", node->val);
+        return;
+    case ND_LVAR:
+        get_lval(node);
+        printf("    pop rax\n");
+        printf("    mov rax, [rax]\n");
+        printf("    push rax\n");
+        return;
+    case ND_ASSIGN:
+        get_lval(node->lhs);
+        gen(node->rhs);
+
+        printf("    pop rdi\n");
+        printf("    pop rax\n");
+        printf("    mov [rax], rdi\n");
+        printf("    push rdi\n"); //このpushの意味は？
+        return;
+	case ND_RETURN:
+		gen(node->lhs);
         printf("    pop rax\n");
         printf("    mov rsp, rbp\n");
         printf("    pop rbp\n");
         printf("    ret\n");
     	return;
-    }
-	if (node->kind == ND_IF) {
-		int tmp = ++SERIAL;
+	case ND_IF:
+		tmp = ++SERIAL;
 		gen(node->lhs);
         printf("    pop rax\n");
         printf("    cmp rax, 0\n");
@@ -347,9 +370,8 @@ void gen(Node *node) {
 		gen(node->rhs->lhs);
         printf(".Lend%d:\n", tmp);
 		return;
-	}
-	if (node->kind == ND_IFELSE) {
-		int tmp = ++SERIAL;
+	case ND_IFELSE:
+		tmp = ++SERIAL;
 		gen(node->lhs);
         printf("    pop rax\n");
         printf("    cmp rax, 0\n");
@@ -361,9 +383,8 @@ void gen(Node *node) {
         printf(".Lend%d:\n", tmp);
 
 		return;
-	}
-	if (node->kind == ND_WHILE) {
-		int tmp = ++SERIAL;
+	case ND_WHILE:
+		tmp = ++SERIAL;
 		printf(".Lbegin%d:\n", tmp);
 		gen(node->lhs);
         printf("    pop rax\n");
@@ -373,9 +394,8 @@ void gen(Node *node) {
         printf("    jmp .Lbegin%d\n", tmp);
         printf(".Lend%d:\n", tmp);
 		return;
-	}	
-	if (node->kind == ND_FOR) {
-		int tmp = ++SERIAL;
+	case ND_FOR:
+		tmp = ++SERIAL;
 		gen(node->lhs); // A
 		printf(".Lbegin%d:\n", tmp);
 		gen(node->rhs->lhs); // B
@@ -387,18 +407,13 @@ void gen(Node *node) {
         printf("    jmp .Lbegin%d\n", tmp);
         printf(".Lend%d:\n", tmp);
 		return;
-	}
-	if (node->kind == ND_BLOCK) {
+	case ND_BLOCK:
 		for (int i = 0; i < node->block_len; ++i) {
 			gen(node->block[i]);
         	printf("    pop rax\n");
 		}
 		return;
-	}
-	if (node->kind == ND_FUNCTION) {
-		//fprintf(stderr, "before\n");
-		char reg[6][4] = {"RDI", "RSI", "RDX", "RCX", "R8", "R9"};
-		//fprintf(stderr, "after\n");
+	case ND_FUNCTION:
 		for (int i = 0; i < node->arg_len; ++i) {
 			gen(node->arg[i]);
         	printf("    pop rax\n");
@@ -424,28 +439,6 @@ void gen(Node *node) {
         printf(".L.end.%d:\n", tmp);
 
 		return;
-	}
-
-    switch (node->kind)
-    {
-    case ND_NUM:
-        printf("    push %d\n", node->val);
-        return;
-    case ND_LVAR:
-        get_lval(node);
-        printf("    pop rax\n");
-        printf("    mov rax, [rax]\n");
-        printf("    push rax\n");
-        return;
-    case ND_ASSIGN:
-        get_lval(node->lhs);
-        gen(node->rhs);
-
-        printf("    pop rdi\n");
-        printf("    pop rax\n");
-        printf("    mov [rax], rdi\n");
-        printf("    push rdi\n"); //このpushの意味は？
-        return;
     }
 
     gen(node->lhs);
