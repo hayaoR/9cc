@@ -111,11 +111,7 @@ void gen(Node *node) {
         return;
 	case ND_RETURN:
 		gen(node->lhs);
-		/*
-		if (node->lhs->kind != ND_FUNCTIONCALL) {
-   	    	printf("    pop rax\n");
-		}
-		*/
+		
    	    printf("    pop rax\n");
         printf("    mov rsp, rbp\n");
         printf("    pop rbp\n");
@@ -155,7 +151,6 @@ void gen(Node *node) {
         printf(".Lend%d:\n", tmp);
 		return;
 	case ND_FOR:
-		//fprintf(stderr, "FOR!\n");
 		tmp = ++SERIAL;
 		gen(node->lhs); // A
 		printf(".Lbegin%d:\n", tmp);
@@ -204,23 +199,6 @@ void gen(Node *node) {
 		return;
     }
 
-/*
-    gen(node->lhs);
-   	gen(node->rhs);
-
-	if (node->lhs->kind != ND_FUNCTIONCALL) {
-    	printf("    pop rdi\n");
-	} else {
-        printf("    mov rdi, rax\n");
-		fprintf(stderr, "lhs\n");
-	}
-	if (node->rhs->kind != ND_FUNCTIONCALL) {
-    	printf("    pop rax\n");
-	} else {
-		fprintf(stderr, "rhs\n");
-	}
-*/
-	
     gen(node->lhs);
     gen(node->rhs);
 

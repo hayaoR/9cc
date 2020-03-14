@@ -17,12 +17,7 @@ int main(int argc, char **argv) {
 	// tokenize and parse
 	// the result is stored in code
     token = tokenize(argv[1]);
-	/*
-    while (token->kind != TK_EOF) {
-		fprintf(stderr, "%d\n", token->kind);
-		token = token->next;
-	}
-	*/
+	
     printf(".intel_syntax noprefix\n");
     printf(".global main\n");
 
@@ -30,9 +25,7 @@ int main(int argc, char **argv) {
     for (int i = 0; code[i]; i++) {
         gen(code[i]);
 
-        //printf("    pop rax\n");
     }
-	//fprintf(stderr, "hey!\n");
 
     return 0;
 } 

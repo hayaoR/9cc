@@ -65,7 +65,6 @@ void function() {
 
 	int i = 0;
 	while (!at_eof()) {
-		//fprintf(stderr, "hoy!start!\n");
     	tok = consume_ident();
 		if (!tok) {
  			error_at(token[pos].str,"関数ではありません");
@@ -105,11 +104,9 @@ void function() {
 		//ボディ
 		int j = 0;
 		while (!consume("}")) {
-			//fprintf(stderr, "body\n");
 			node->block[j++] = stmt();
 		}
 		node->block_len = j;
-		//fprintf(stderr, "block_len%d!\n", j);
 		
 
 	}
@@ -130,7 +127,6 @@ Node *stmt() {
 		if (consume_kind(TK_ELSE)) {
 			node->kind = ND_IFELSE;
 			child->rhs = stmt();
-			//child->rhs = stmt();
 		} else {
 			node->kind = ND_IF;
 		}
@@ -181,7 +177,6 @@ Node *stmt() {
 			tmp_node = stmt();
 			node->block[i] = tmp_node;
 			node->block_len = i+1;
-			//fprintf(stderr, "get\n");
 		}
 		node->kind = ND_BLOCK;
 	} else {
@@ -279,7 +274,6 @@ Node *term() {
     Token *tok = consume_ident();
     if (tok) {
 		if (consume("(")) {
-			//fprintf(stderr, "hey\n");
 			//関数呼び出し
 			node = calloc(1, sizeof(Node));
 			node->kind = ND_FUNCTIONCALL;
@@ -299,10 +293,9 @@ Node *term() {
 				consume(",");
 			}
 
-			//fprintf(stderr, "aftertok\n");
 			return node;
 		} else {
-			//多分変数解決?
+			//変数解決
 			node = calloc(1, sizeof(Node));
 			node->kind = ND_LVAR;
 
