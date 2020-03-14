@@ -78,6 +78,30 @@ try 1 "main() {i = 0; n=4; if (i < n) {
 							}
 							return i;
 							}"
+try 5 "
+main() {
+	n = 3;
+	if (n==0) {
+		return 0;
+	} else if (n == 1) {
+		return 1;
+	} else {
+		return 5;
+	}
+}
+"
+try 1 "
+main() {
+	n = 1;
+	if (n==0) {
+		return 0;
+	} else if (n == 1) {
+		return 1;
+	} else {
+		return 5;
+	}
+}
+"
 try 1 "main() {foo(); return 1;}"
 try 1 "main() {fooo(3, 4); return 1;}"
 try 55 "
@@ -115,5 +139,48 @@ main() {
   return sum(1, 10); 
  }
 "
+try 7 "
+	sum(n) {
+		if (n==3) {
+			return 3;
+		}
+		if (n==4) {
+			return 4;
+		}
+		return sum(3) + sum(4);
+	}
+	main() {
+		return sum(0);
+	}
 
+"
+try 120 "
+factorial(n) {
+   if(n == 0) {
+      return 1;
+   } else {
+      return n * factorial(n-1);
+   }
+}
+
+main() {
+	return factorial(5);
+}
+"
+
+try 5 "
+fibbonacci(n) {
+   if(n == 0){
+      return 0;
+   } else if(n == 1) {
+      return 1;
+   } else {
+      return fibbonacci(n-1) + fibbonacci(n-2);
+   }
+}
+
+main() {
+	return fibbonacci(5);
+}
+"
 echo Ok

@@ -446,9 +446,12 @@ void gen(Node *node) {
         return;
 	case ND_RETURN:
 		gen(node->lhs);
+		/*
 		if (node->lhs->kind != ND_FUNCTIONCALL) {
    	    	printf("    pop rax\n");
 		}
+		*/
+   	    printf("    pop rax\n");
         printf("    mov rsp, rbp\n");
         printf("    pop rbp\n");
         printf("    ret\n");
@@ -531,13 +534,32 @@ void gen(Node *node) {
         printf("    add rsp, 8\n");
         printf(".L.end.%d:\n", tmp);
 
+		//スタックトップにプッシュするpopしてもらわないと困る
+        printf("    push rax\n");
 		return;
     }
 
+/*
+    gen(node->lhs);
+   	gen(node->rhs);
+
+	if (node->lhs->kind != ND_FUNCTIONCALL) {
+    	printf("    pop rdi\n");
+	} else {
+        printf("    mov rdi, rax\n");
+		fprintf(stderr, "lhs\n");
+	}
+	if (node->rhs->kind != ND_FUNCTIONCALL) {
+    	printf("    pop rax\n");
+	} else {
+		fprintf(stderr, "rhs\n");
+	}
+*/
+	
     gen(node->lhs);
     gen(node->rhs);
 
-    printf("    pop rdi\n");
+   	printf("    pop rdi\n");
     printf("    pop rax\n");
 
     switch (node->kind) {
