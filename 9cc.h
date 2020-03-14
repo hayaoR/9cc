@@ -97,7 +97,6 @@ Token *tokenize(char *p);
 
 /* generate.c */
 void function();
-void program();
 Node *stmt();
 Node *expr();
 Node *assign();
